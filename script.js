@@ -6,7 +6,8 @@ let intervalMap = new Map();
 function createLetters(text, rad, offset, frontColor, direction, id) {
     const radius = rad;
     let letters = text.split('');
-    let dir = (direction === 'backwards') ? -1 : 1;
+    if(direction != 'backwards') { letters = letters.reverse(); }
+    let dir = (direction == 'backwards') ? -1 : 1;
 
     const container = document.createElement('div');
     container.classList.add('text-container');
@@ -16,7 +17,7 @@ function createLetters(text, rad, offset, frontColor, direction, id) {
     startTimeMap.set(id, Date.now());
 
     letters.forEach((letter, index) => {
-        const angle = (360 / letters.length) * dir * index;
+        const angle = (360 / letters.length) * dir * index - 8;
         const radian = angle * (Math.PI / 180);
         const x = radius * Math.cos(radian);
         const y = radius * Math.sin(radian);
@@ -86,3 +87,19 @@ function updateText(newText) {
         createLetters(` ⟨ ${newText} ⟨ ${newText} ⟨ ${newText}`, 200, 0, 'white', 'backwards', 'set2');
     }
 }
+
+/* GUI */
+import { GUI } from 'https://cdn.skypack.dev/dat.gui';
+const CONFIG = { shadowHeight: 24, fontSize: 26, refOpacity: 0.7, refBlur: 2, newText: 'Revolving Text' };
+const CTRL = new GUI();
+const UPDATE = () => {
+    for (const key of Object.keys(CONFIG)) {
+        document.documentElement.style.setProperty(`--${key}`, CONFIG[key]);
+    }
+};
+CTRL.add(CONFIG, 'fontSize', 14, 42, 1).name("Font Size").onChange(UPDATE);
+CTRL.add(CONFIG, 'shadowHeight', 0, 264, 1).name("Height").onChange(UPDATE);
+CTRL.add(CONFIG, 'refOpacity', 0, 1, 0.01).name("Reflection Opacity").onChange(UPDATE);
+CTRL.add(CONFIG, 'refBlur', 0, 12, 1).name("Reflection Blur").onChange(UPDATE);
+CTRL.add(CONFIG, 'newText').name("Text").onChange(updateText);
+UPDATE();
